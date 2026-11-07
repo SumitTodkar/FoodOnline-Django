@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'media',
     'menu',
     'orders',
+    'accounts.apps.AccountsConfig',
 ]
 
 MIDDLEWARE = [
