@@ -172,3 +172,134 @@ class ChangePasswordView(
     success_url = reverse_lazy('accounts:profile')
 
     success_message = 'Your password was changed successfully.'
+
+
+@login_required
+def address_list(request):
+
+    return render(
+        request,
+        'accounts/address_list.html',
+        {
+            'addresses': request.user.addresses.all()
+        }
+    )
+
+
+@login_required
+def address_create(request):
+
+    form = AddressForm(
+        request.POST or None,
+        initial={
+            'full_name': request.user.get_full_name()
+        }
+    )
+
+    if request.method == 'POST' and form.is_valid():
+
+        address = form.save(commit=False)
+
+        address.user = request.user
+
+        address.save()
+
+        messages.success(request, 'Address saved.')
+
+        return redirect(
+            _safe_next(request) or 'accounts:address_list'
+        )
+
+    return render(
+        request,
+        'accounts/address_form.html',
+        {
+            'form': form,
+            'title': 'Add a new address'
+        }
+    )
+
+
+@login_required
+def address_update(request, pk):
+
+    address = get_object_or_404(
+        Address,
+        pk=pk,
+        user=request.user
+    )
+
+    form = AddressForm(
+        request.POST or None,
+        instance=address
+    )
+
+    if request.method == 'POST' and form.is_valid():
+
+        form.save()
+
+        messages.success(request, 'Address updated.')
+
+        return redirect('accounts:address_list')
+
+    return render(
+        request,
+        'accounts/address_form.html',
+        {
+            'form': form,
+            'title': 'Edit address'
+        }
+    )
+
+
+@login_required
+@require_POST
+def address_delete(request, pk):
+
+    address = get_object_or_404(
+        Address,
+        pk=pk,
+        user=request.user
+    )
+
+    was_default = address.is_default
+
+    address.delete()
+
+    if was_default:
+
+        replacement = request.user.addresses.first()
+
+        if replacement:
+            replacement.is_default = True
+            replacement.save()
+
+    messages.success(request, 'Address deleted.')
+
+    return redirect('accounts:address_list')
+
+
+
+@login_required
+@require_POST
+def address_set_default(request, pk):
+
+    address = get_object_or_404(
+        Address,
+        pk=pk,
+        user=request.user
+    )
+
+    address.is_default = True
+
+    address.save()
+
+    messages.success(
+        request,
+        'Default address updated.'
+    )
+
+    return redirect('accounts:address_list')
+
+
+
