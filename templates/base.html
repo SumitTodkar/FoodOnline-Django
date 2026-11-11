@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}FoodOnline{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #e85d04 !important;
+        }
+
+        .auth-container {
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 480px;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .btn-food {
+            background-color: #e85d04;
+            color: white;
+        }
+
+        .btn-food:hover {
+            background-color: #d14e00;
+            color: white;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                FoodOnline
+            </a>
+
+            <div class="ms-auto">
+                {% if user.is_authenticated %}
+                    <span class="me-3">
+                        Hello, {{ user.username }}
+                    </span>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}"
+                       class="btn btn-outline-dark me-2">
+                        Login
+                    </a>
+
+                    <a href="{% url 'accounts:register' %}"
+                       class="btn btn-food">
+                        Register
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Django messages -->
+    <div class="container mt-3">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+    </div>
+
+    <!-- Main content -->
+    {% block content %}
+    {% endblock %}
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

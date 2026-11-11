@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Create Account | FoodOnline
+{% endblock %}
+
+{% block content %}
+
+<div class="container auth-container">
+
+    <div class="auth-card">
+
+        <h2 class="text-center mb-2">
+            Create Account
+        </h2>
+
+        <p class="text-center text-muted mb-4">
+            Join FoodOnline and order your favourite food.
+        </p>
+
+        <form method="POST" action="{% url 'accounts:register' %}">
+
+            {% csrf_token %}
+
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+
+                <div class="mb-3">
+
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <div class="form-text">
+                            {{ field.help_text|safe }}
+                        </div>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <div class="text-danger small">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            {% endfor %}
+
+            <button type="submit" class="btn btn-food w-100 py-2">
+                Create Account
+            </button>
+
+        </form>
+
+        <div class="text-center mt-4">
+
+            <p class="mb-0">
+                Already have an account?
+
+                <a href="{% url 'accounts:login' %}">
+                    Login here
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
