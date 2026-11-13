@@ -1,0 +1,44 @@
+{% load static %}
+<footer class="fo-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <a class="d-inline-flex align-items-center gap-2 mb-3" href="{% url 'core:home' %}">
+          <span class="brand-text">Food<span>Online</span></span>
+        </a>
+        <p class="small mb-3">Fresh, hot and on time. Order your favourite meals from local kitchens and track them every step of the way.</p>
+        <div class="social">
+          <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2 offset-lg-1">
+        <h5>Explore</h5>
+        <ul>
+          <li><a href="{% url 'core:home' %}">Home</a></li>
+          <li><a href="{% url 'menu:list' %}">Full menu</a></li>
+          <li><a href="{% url 'cart:detail' %}">Your cart</a></li>
+          {% if user.is_authenticated %}<li><a href="{% url 'orders:list' %}">My orders</a></li>{% endif %}
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h5>Categories</h5>
+        <ul>
+          {% for category in nav_categories|slice:":5" %}
+            <li><a href="{{ category.get_absolute_url }}">{{ category.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-lg-3">
+        <h5>Delivery info</h5>
+        <ul>
+          <li><i class="bi bi-truck me-2"></i>Delivery charge {{ CURRENCY }}{{ DELIVERY_CHARGE|floatformat:0 }}</li>
+          <li><i class="bi bi-gift me-2"></i>Free above {{ CURRENCY }}{{ FREE_DELIVERY_ABOVE|floatformat:0 }}</li>
+          <li><i class="bi bi-cash-coin me-2"></i>Cash on delivery</li>
+        </ul>
+      </div>
+    </div>
+    <div class="copyright text-center">&copy; {% now "Y" %} {{ SITE_NAME }}. All rights reserved.</div>
+  </div>
+</footer>

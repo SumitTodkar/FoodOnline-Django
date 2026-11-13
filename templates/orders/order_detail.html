@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Order {{ order.order_number }} | {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div>
+      <nav aria-label="breadcrumb"><ol class="breadcrumb small mb-1">
+        <li class="breadcrumb-item"><a href="{% url 'orders:list' %}">My orders</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ order.order_number }}</li>
+      </ol></nav>
+      <h1>Order {{ order.order_number }}</h1>
+      <div class="text-muted small">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</div>
+    </div>
+    <span class="badge rounded-pill fs-6 text-bg-{{ order.badge_class }}">{{ order.get_status_display }}</span>
+  </div>
+</section>
+
+<section class="section pt-4">
+  <div class="container">
+    <div class="panel mb-4">
+      <h2 class="panel-title">Order tracking</h2>
+      {% include 'partials/order_tracker.html' %}
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="panel">
+          <h2 class="panel-title">Items</h2>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead><tr><th>Dish</th><th class="text-end">Price</th><th class="text-center">Qty</th><th class="text-end">Total</th></tr></thead>
+              <tbody>
+                {% for item in order.items.all %}
+                  <tr>
+                    <td>{% if item.food %}<a class="text-reset" href="{{ item.food.get_absolute_url }}">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %}</td>
+                    <td class="text-end">{{ CURRENCY }}{{ item.price|floatformat:2 }}</td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-end">{{ CURRENCY }}{{ item.line_total|floatformat:2 }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <hr>
+          {% include 'partials/price_summary.html' with subtotal=order.subtotal delivery_charge=order.delivery_charge total=order.total %}
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="panel mb-4">
+          <h2 class="panel-title">Delivery details</h2>
+          <div class="fw-semibold">{{ order.full_name }}</div>
+          <div class="text-muted small">{{ order.full_address }}</div>
+          <div class="text-muted small mt-1"><i class="bi bi-telephone"></i> {{ order.phone }}</div>
+          {% if order.notes %}<div class="small mt-2"><span class="text-muted">Instructions:</span> {{ order.notes }}</div>{% endif %}
+        </div>
+        <div class="panel">
+          <h2 class="panel-title">Payment</h2>
+          <div class="d-flex justify-content-between small mb-1"><span class="text-muted">Method</span><span>{{ order.get_payment_method_display }}</span></div>
+          <div class="d-flex justify-content-between small"><span class="text-muted">Status</span><span>{{ order.get_payment_status_display }}</span></div>
+          {% if order.can_cancel %}
+            <hr>
+            <form method="post" action="{% url 'orders:cancel' order.order_number %}" onsubmit="return confirm('Cancel this order?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger w-100 rounded-pill">Cancel order</button>
+            </form>
+            <div class="form-text text-center">Orders can only be cancelled before they are confirmed.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

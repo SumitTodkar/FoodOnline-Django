@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout | {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-header"><div class="container"><h1>Checkout</h1></div></section>
+
+<section class="section pt-4">
+  <div class="container">
+    <form method="post" novalidate data-once>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="panel mb-4">
+            <h2 class="panel-title"><i class="bi bi-geo-alt text-brand me-1"></i> Delivery address</h2>
+            {% if form.address.field.queryset.exists %}
+              {% include 'partials/form_field.html' with field=form.address %}
+              <p class="small text-muted">Choose a saved address above, or leave it on &ldquo;Enter a new address&rdquo; and fill in the details below.</p>
+              <hr>
+            {% endif %}
+            <div class="row">
+              <div class="col-md-6">{% include 'partials/form_field.html' with field=form.full_name %}</div>
+              <div class="col-md-6">{% include 'partials/form_field.html' with field=form.phone %}</div>
+              <div class="col-12">{% include 'partials/form_field.html' with field=form.email %}</div>
+              <div class="col-12">{% include 'partials/form_field.html' with field=form.address_line1 %}</div>
+              <div class="col-12">{% include 'partials/form_field.html' with field=form.address_line2 %}</div>
+              <div class="col-md-6">{% include 'partials/form_field.html' with field=form.landmark %}</div>
+              <div class="col-md-6">{% include 'partials/form_field.html' with field=form.city %}</div>
+              <div class="col-md-6">{% include 'partials/form_field.html' with field=form.state %}</div>
+              <div class="col-md-6">{% include 'partials/form_field.html' with field=form.pincode %}</div>
+            </div>
+            {% include 'partials/form_field.html' with field=form.save_address %}
+            {% include 'partials/form_field.html' with field=form.notes %}
+          </div>
+
+          <div class="panel">
+            <h2 class="panel-title"><i class="bi bi-wallet2 text-brand me-1"></i> Payment method</h2>
+            <label class="payment-option mb-2">
+              <input class="form-check-input mt-0" type="radio" name="payment_method" value="cod" checked>
+              <div>
+                <div class="fw-semibold">Cash on Delivery</div>
+                <div class="small text-muted">Pay in cash when your order arrives.</div>
+              </div>
+              <i class="bi bi-cash-coin ms-auto fs-4 text-brand"></i>
+            </label>
+            <div class="payment-option disabled" aria-disabled="true">
+              <input class="form-check-input mt-0" type="radio" disabled>
+              <div>
+                <div class="fw-semibold">Online payment</div>
+                <div class="small text-muted">UPI, cards and net banking. Coming soon.</div>
+              </div>
+              <i class="bi bi-credit-card ms-auto fs-4"></i>
+            </div>
+            {% for error in form.payment_method.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="panel sticky-panel">
+            <h2 class="panel-title"><i class="bi bi-receipt text-brand me-1"></i> Order summary</h2>
+            {% for item in cart %}
+              <div class="d-flex justify-content-between gap-3 py-1 small">
+                <span>{{ item.quantity }} &times; {{ item.food.name }}</span>
+                <span class="text-nowrap">{{ CURRENCY }}{{ item.total|floatformat:2 }}</span>
+              </div>
+            {% endfor %}
+            <hr>
+            {% include 'partials/price_summary.html' with subtotal=cart.subtotal delivery_charge=cart.delivery_charge total=cart.total %}
+            <button type="submit" class="btn btn-brand w-100 mt-3 py-2">Place order &middot; {{ CURRENCY }}{{ cart.total|floatformat:2 }}</button>
+            <a href="{% url 'cart:detail' %}" class="btn btn-link w-100 text-muted mt-1">Back to cart</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

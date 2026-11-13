@@ -1,0 +1,6 @@
+<div class="summary-line"><span>Subtotal</span><span>{{ CURRENCY }}{{ subtotal|floatformat:2 }}</span></div>
+<div class="summary-line">
+  <span>Delivery charge</span>
+  <span>{% if delivery_charge %}{{ CURRENCY }}{{ delivery_charge|floatformat:2 }}{% else %}<span class="text-success fw-semibold">FREE</span>{% endif %}</span>
+</div>
+<div class="summary-line total"><span>Total</span><span>{{ CURRENCY }}{{ total|floatformat:2 }}</span></div>

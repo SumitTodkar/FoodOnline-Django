@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Your cart | {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-header"><div class="container"><h1>Your cart</h1></div></section>
+
+<section class="section pt-4">
+  <div class="container">
+    {% if cart.count %}
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="panel">
+            {% if cart.has_unavailable %}
+              <div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-1"></i> Some items are unavailable right now. Remove them to continue to checkout.</div>
+            {% endif %}
+            {% for item in cart %}
+              <div class="cart-row {% if not item.available %}unavailable{% endif %}">
+                <a class="thumb" href="{{ item.food.get_absolute_url }}">
+                  {% if item.food.image %}<img src="{{ item.food.image.url }}" alt="{{ item.food.name }}">{% else %}<div class="img-fallback"><i class="bi bi-egg-fried"></i></div>{% endif %}
+                </a>
+                <div class="flex-grow-1">
+                  <a class="fw-semibold text-reset" href="{{ item.food.get_absolute_url }}">{{ item.food.name }}</a>
+                  <div class="small text-muted">{{ item.food.category.name }} &middot; {{ CURRENCY }}{{ item.price|floatformat:2 }} each</div>
+                  {% if not item.available %}<span class="badge text-bg-secondary mt-1">Unavailable</span>{% endif %}
+                </div>
+
+                <div class="qty-control">
+                  <form action="{% url 'cart:decrease' item.food.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" aria-label="Decrease quantity"><i class="bi bi-dash"></i></button>
+                  </form>
+                  <span>{{ item.quantity }}</span>
+                  <form action="{% url 'cart:increase' item.food.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" aria-label="Increase quantity" {% if not item.available %}disabled{% endif %}><i class="bi bi-plus"></i></button>
+                  </form>
+                </div>
+
+                <div class="fw-bold text-end" style="min-width:88px;">{{ CURRENCY }}{{ item.total|floatformat:2 }}</div>
+
+                <form action="{% url 'cart:remove' item.food.pk %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" aria-label="Remove {{ item.food.name }}" title="Remove"><i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+          <a href="{% url 'menu:list' %}" class="btn btn-link text-brand mt-3 px-0"><i class="bi bi-arrow-left"></i> Continue shopping</a>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="panel sticky-panel">
+            <h2 class="panel-title">Order summary</h2>
+            {% if cart.free_delivery_gap %}
+              <div class="small mb-1">Add <strong>{{ CURRENCY }}{{ cart.free_delivery_gap|floatformat:2 }}</strong> more for free delivery</div>
+              <div class="progress mb-3" role="progressbar" aria-valuenow="{{ cart.free_delivery_progress }}" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" ></div>
+              </div>
+            {% else %}
+              <div class="alert alert-success py-2 small"><i class="bi bi-check-circle me-1"></i> You've unlocked free delivery!</div>
+            {% endif %}
+            {% include 'partials/price_summary.html' with subtotal=cart.subtotal delivery_charge=cart.delivery_charge total=cart.total %}
+            {% if cart.has_unavailable %}
+              <button class="btn btn-brand w-100 mt-3 py-2" disabled>Proceed to checkout</button>
+            {% else %}
+              <a href="{% url 'orders:checkout' %}" class="btn btn-brand w-100 mt-3 py-2">Proceed to checkout</a>
+            {% endif %}
+            {% if not user.is_authenticated %}
+              <p class="small text-muted text-center mt-2 mb-0">You'll be asked to log in or sign up first.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-bag"></i>
+        <h2 class="h4 mt-3">Your cart is empty</h2>
+        <p>Looks like you haven't added anything yet.</p>
+        <a href="{% url 'menu:list' %}" class="btn btn-brand px-4">Browse the menu</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

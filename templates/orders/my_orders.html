@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}My orders | {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-header"><div class="container"><h1>My orders</h1></div></section>
+
+<section class="section pt-4">
+  <div class="container">
+    <div class="chip-scroll mb-4">
+      <a class="chip {% if not status %}active{% endif %}" href="{% url 'orders:list' %}">All</a>
+      {% for value, label in status_choices %}
+        <a class="chip {% if status == value %}active{% endif %}" href="?status={{ value }}">{{ label }}</a>
+      {% endfor %}
+    </div>
+
+    {% for order in page_obj %}
+      <div class="order-card mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+          <div>
+            <a class="fw-semibold" href="{{ order.get_absolute_url }}">{{ order.order_number }}</a>
+            <div class="small text-muted">{{ order.created_at|date:"d M Y, h:i A" }} &middot; {{ order.item_count }} item{{ order.item_count|pluralize }}</div>
+          </div>
+          <span class="badge rounded-pill text-bg-{{ order.badge_class }}">{{ order.get_status_display }}</span>
+        </div>
+        <div class="small text-muted my-2">
+          {% for item in order.items.all|slice:":3" %}{{ item.quantity }} &times; {{ item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if order.items.all|length > 3 %} &hellip;{% endif %}
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="fw-bold">{{ CURRENCY }}{{ order.total|floatformat:2 }}</div>
+          <a href="{{ order.get_absolute_url }}" class="btn btn-outline-brand btn-sm px-3">View &amp; track</a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty-state">
+        <i class="bi bi-receipt"></i>
+        <h2 class="h4 mt-3">No orders {% if status %}with this status{% else %}yet{% endif %}</h2>
+        <p>{% if status %}Try another filter.{% else %}When you place an order it will show up here.{% endif %}</p>
+        <a href="{% url 'menu:list' %}" class="btn btn-brand px-4">Order something tasty</a>
+      </div>
+    {% endfor %}
+
+    {% if page_obj.has_other_pages %}
+      <nav class="mt-4" aria-label="Pagination">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?{% if status %}status={{ status }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Previous</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          {% endif %}
+          <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?{% if status %}status={{ status }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,15 +1,204 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodOnline</title>
-</head>
+{% block title %}{{ SITE_NAME }} | Order food online{% endblock %}
 
-<body>
-    <h1>Welcome to FoodOnline!</h1>
-    <p>Delicious food delivered to your doorstep.</p>
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <span class="eyebrow">Hungry? We've got you</span>
+        <h1 class="mt-2 mb-3">Delicious food, <em>delivered</em> to your door</h1>
+        <p class="lead text-muted mb-4">Pizza, biryani, dosa, burgers and more from local kitchens. Order in a few taps, pay on delivery.</p>
+        <form class="hero-search" action="{% url 'menu:list' %}" method="get" role="search">
+          <input type="search" name="q" placeholder="What are you craving today?" aria-label="Search food" maxlength="80">
+          <button type="submit" class="btn btn-brand px-4"><i class="bi bi-search me-1"></i> Search</button>
+        </form>
+        <div class="hero-stats">
+          <div><strong>{{ categories|length }}+</strong><span>Food categories</span></div>
+          <div><strong>{{ popular_foods|length }}+</strong><span>Popular dishes</span></div>
+          <div><strong>{{ CURRENCY }}{{ FREE_DELIVERY_ABOVE|floatformat:0 }}+</strong><span>Free delivery</span></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-collage">
+          <div class="blob"></div>
+          {% for food in hero_foods %}
+            <a href="{{ food.get_absolute_url }}"><img class="c{{ forloop.counter }}" src="{{ food.image.url }}" alt="{{ food.name }}"></a>
+          {% empty %}
+            <div class="emoji-fallback" aria-hidden="true">🍕🍔🍛</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-</body>
-</html>
+<!-- Categories -->
+{% if categories %}
+<section class="section pb-2">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">Browse</span><h2>Food categories</h2></div>
+      <a class="link-more" href="{% url 'menu:list' %}">View full menu <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row row-cols-3 row-cols-md-4 row-cols-lg-7 g-3 g-md-4">
+      {% for category in categories %}
+        <div class="col">
+          <a class="category-tile" href="{{ category.get_absolute_url }}">
+            <div class="thumb">
+              {% if category.image %}<img src="{{ category.image.url }}" alt="{{ category.name }}" loading="lazy">{% else %}<i class="bi bi-egg-fried"></i>{% endif %}
+            </div>
+            <span>{{ category.name }}</span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Promo banners -->
+{% if banners %}
+<section class="section pb-2">
+  <div class="container">
+    <div class="row g-3 g-lg-4">
+      {% for banner in banners %}
+        <div class="col-md-6 col-lg-4">
+          <a class="promo-banner" href="{{ banner.button_url }}">
+            {% if banner.image %}<img src="{{ banner.image.url }}" alt="" loading="lazy">{% endif %}
+            <div class="promo-body">
+              <h3>{{ banner.title }}</h3>
+              {% if banner.subtitle %}<p class="mb-2 small">{{ banner.subtitle }}</p>{% endif %}
+              <span class="badge rounded-pill text-bg-light">{{ banner.button_text }} <i class="bi bi-arrow-right"></i></span>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Popular foods -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">Customer favourites</span><h2>Popular right now</h2></div>
+      <a class="link-more" href="{% url 'menu:list' %}">See all dishes <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+      {% for food in popular_foods %}
+        <div class="col">{% include 'partials/food_card.html' %}</div>
+      {% empty %}
+        <div class="col-12">
+          <div class="empty-state"><i class="bi bi-emoji-smile"></i><p class="mt-3 mb-0">Popular dishes will show up here. Mark foods as popular in the admin panel.</p></div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Special offers -->
+{% if offers %}
+<section class="section pt-2">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">Save more</span><h2>Special offers</h2></div>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+      {% for offer in offers %}
+        <div class="col">
+          <a href="{{ offer.link }}" class="offer-card text-reset">
+            {% if offer.badge %}<span class="offer-badge">{{ offer.badge }}</span>{% endif %}
+            <h3>{{ offer.title }}</h3>
+            <p>{{ offer.description }}</p>
+            <span class="text-brand fw-semibold small">Order now <i class="bi bi-arrow-right"></i></span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Featured restaurants -->
+{% if restaurants %}
+<section class="section pt-2">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">Top kitchens</span><h2>Featured restaurants</h2></div>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+      {% for restaurant in restaurants %}
+        <div class="col">
+          <a class="restaurant-card" href="{{ restaurant.get_absolute_url }}">
+            <div class="cover">
+              {% if restaurant.image %}<img src="{{ restaurant.image.url }}" alt="{{ restaurant.name }}" loading="lazy">{% else %}<div class="img-fallback"><i class="bi bi-shop"></i></div>{% endif %}
+            </div>
+            <div class="p-3">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <h3 class="h6 mb-1 fw-semibold" style="font-family: 'Poppins', sans-serif;">{{ restaurant.name }}</h3>
+                <span class="rating-pill"><i class="bi bi-star-fill"></i> {{ restaurant.rating }}</span>
+              </div>
+              <div class="small text-muted">{{ restaurant.cuisine }}</div>
+              <div class="small text-muted mt-1"><i class="bi bi-clock"></i> {{ restaurant.delivery_time }} min</div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- How it works -->
+<section class="section">
+  <div class="container">
+    <div class="text-center mb-4"><span class="eyebrow">Simple as 1-2-3</span><h2>How it works</h2></div>
+    <div class="row g-3">
+      <div class="col-md-4 step-card"><div class="step-icon"><i class="bi bi-search-heart"></i></div><h3 class="h5">Pick your food</h3><p class="text-muted small mb-0">Browse categories or search for the dish you're craving.</p></div>
+      <div class="col-md-4 step-card"><div class="step-icon"><i class="bi bi-bag-check"></i></div><h3 class="h5">Place your order</h3><p class="text-muted small mb-0">Add to cart, choose your address and confirm with cash on delivery.</p></div>
+      <div class="col-md-4 step-card"><div class="step-icon"><i class="bi bi-bicycle"></i></div><h3 class="h5">Track &amp; enjoy</h3><p class="text-muted small mb-0">Follow your order from the kitchen to your doorstep.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+{% if testimonials %}
+<section class="section pt-2">
+  <div class="container">
+    <div class="text-center mb-4"><span class="eyebrow">Happy customers</span><h2>What people say</h2></div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+      {% for t in testimonials %}
+        <div class="col">
+          <div class="testimonial-card">
+            <div class="stars mb-2" aria-label="{{ t.rating }} out of 5 stars">
+              {% for i in "12345" %}{% if forloop.counter <= t.rating %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}{% endfor %}
+            </div>
+            <p class="small mb-3">&ldquo;{{ t.text }}&rdquo;</p>
+            <div class="d-flex align-items-center gap-2">
+              <span class="avatar">{{ t.name|slice:":1" }}</span>
+              <div><div class="fw-semibold small">{{ t.name }}</div>{% if t.location %}<div class="text-muted" style="font-size:.78rem;">{{ t.location }}</div>{% endif %}</div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Call to action -->
+<section class="section pt-0">
+  <div class="container">
+    <div class="cta-band">
+      <h2 class="mb-2">Ready to order?</h2>
+      <p class="mb-3">Your next favourite meal is a few taps away.</p>
+      <a class="btn btn-lg px-4" href="{% url 'menu:list' %}">Explore the menu</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

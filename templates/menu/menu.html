@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if active_category %}{{ active_category.name }}{% else %}Menu{% endif %} | {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb small mb-2">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'menu:list' %}">Menu</a></li>
+        {% if active_category %}<li class="breadcrumb-item active" aria-current="page">{{ active_category.name }}</li>{% endif %}
+      </ol>
+    </nav>
+    <h1>{% if active_category %}{{ active_category.name }}{% else %}Our menu{% endif %}</h1>
+    {% if active_category.description %}<p class="text-muted mb-0 mt-1">{{ active_category.description }}</p>{% endif %}
+    {% if active_restaurant %}<p class="mb-0 mt-1"><i class="bi bi-shop text-brand"></i> From <strong>{{ active_restaurant.name }}</strong></p>{% endif %}
+  </div>
+</section>
+
+<section class="section pt-4">
+  <div class="container">
+    <!-- Category chips -->
+    <div class="chip-scroll mb-3">
+      <a class="chip {% if not active_category %}active{% endif %}" href="{% url 'menu:list' %}{% if active_restaurant %}?restaurant={{ active_restaurant.slug }}{% endif %}">All</a>
+      {% for category in categories %}
+        <a class="chip {% if active_category.pk == category.pk %}active{% endif %}" href="{{ category.get_absolute_url }}{% if active_restaurant %}?restaurant={{ active_restaurant.slug }}{% endif %}">{{ category.name }}</a>
+      {% endfor %}
+    </div>
+
+    <!-- Filters -->
+    <form method="get" action="{{ request.path }}" class="filter-bar mb-4">
+      {% if active_restaurant %}<input type="hidden" name="restaurant" value="{{ active_restaurant.slug }}">{% endif %}
+      <div class="row g-2 align-items-center">
+        <div class="col-12 col-lg-4">
+          <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search dishes, categories, restaurants" maxlength="80" aria-label="Search">
+        </div>
+        <div class="col-6 col-lg-2">
+          <select name="veg" class="form-select" data-autosubmit aria-label="Diet">
+            <option value="" {% if not diet %}selected{% endif %}>All diets</option>
+            <option value="1" {% if diet == '1' %}selected{% endif %}>Vegetarian</option>
+            <option value="0" {% if diet == '0' %}selected{% endif %}>Non-vegetarian</option>
+          </select>
+        </div>
+        <div class="col-6 col-lg-3">
+          <select name="sort" class="form-select" data-autosubmit aria-label="Sort by">
+            {% for value, label in sort_options %}
+              <option value="{{ value }}" {% if sort == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-6 col-lg-auto">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="available" value="1" id="availableOnly" data-autosubmit {% if available_only %}checked{% endif %}>
+            <label class="form-check-label small" for="availableOnly">Available only</label>
+          </div>
+        </div>
+        <div class="col-6 col-lg text-end">
+          <button type="submit" class="btn btn-brand btn-sm px-3">Apply</button>
+          <a href="{{ request.path }}" class="btn btn-link btn-sm text-muted">Reset</a>
+        </div>
+      </div>
+    </form>
+
+    <p class="text-muted small mb-3">{{ total_count }} dish{{ total_count|pluralize:"es" }} found{% if query %} for &ldquo;{{ query }}&rdquo;{% endif %}</p>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+      {% for food in page_obj %}
+        <div class="col">{% include 'partials/food_card.html' %}</div>
+      {% empty %}
+        <div class="col-12">
+          <div class="empty-state">
+            <i class="bi bi-search"></i>
+            <h3 class="h5 mt-3">No dishes match your search</h3>
+            <p>Try a different keyword or clear your filters.</p>
+            <a href="{% url 'menu:list' %}" class="btn btn-brand">Show all dishes</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+      <nav class="mt-5" aria-label="Pagination">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Previous</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          {% endif %}
+          <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ food.name }} | {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}{{ food.description|truncatechars:150 }}{% endblock %}
+
+{% block content %}
+<section class="section pt-4">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'menu:list' %}">Menu</a></li>
+        <li class="breadcrumb-item"><a href="{{ food.category.get_absolute_url }}">{{ food.category.name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ food.name }}</li>
+      </ol>
+    </nav>
+
+    <div class="row g-4 g-lg-5 align-items-center">
+      <div class="col-lg-6">
+        <div class="detail-img">
+          {% if food.image %}<img src="{{ food.image.url }}" alt="{{ food.name }}">{% else %}<div class="img-fallback"><i class="bi bi-egg-fried" style="font-size:5rem;"></i></div>{% endif %}
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          <a class="chip" href="{{ food.category.get_absolute_url }}">{{ food.category.name }}</a>
+          <span class="chip">
+            <span class="diet-dot {% if food.is_veg %}veg{% else %}nonveg{% endif %}" style="position:static;width:16px;height:16px;"></span>
+            {% if food.is_veg %}Vegetarian{% else %}Non-vegetarian{% endif %}
+          </span>
+          {% if food.is_popular %}<span class="chip"><i class="bi bi-fire text-brand"></i> Popular</span>{% endif %}
+        </div>
+        <h1 class="mb-2">{{ food.name }}</h1>
+        {% if food.restaurant %}
+          <p class="text-muted mb-3"><i class="bi bi-shop"></i> By <a href="{{ food.restaurant.get_absolute_url }}">{{ food.restaurant.name }}</a></p>
+        {% endif %}
+        <p class="text-muted">{{ food.description|linebreaksbr }}</p>
+        <div class="d-flex align-items-center gap-4 my-3">
+          <div class="price-lg">{{ CURRENCY }}{{ food.price|floatformat:2 }}</div>
+          <div class="text-muted"><i class="bi bi-clock"></i> Ready in about {{ food.preparation_time }} min</div>
+        </div>
+
+        {% if food.is_available and food.category.is_active %}
+          <form action="{% url 'cart:add' food.pk %}" method="post" class="js-add-to-cart d-flex flex-wrap gap-3 align-items-center mt-4">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <div class="qty-control">
+              <button type="button" data-qty-step="-1" aria-label="Decrease quantity"><i class="bi bi-dash"></i></button>
+              <input type="number" name="quantity" value="1" min="1" max="20" aria-label="Quantity">
+              <button type="button" data-qty-step="1" aria-label="Increase quantity"><i class="bi bi-plus"></i></button>
+            </div>
+            <button type="submit" class="btn btn-brand btn-lg px-4"><i class="bi bi-bag-plus me-1"></i> Add to cart</button>
+          </form>
+        {% else %}
+          <div class="alert alert-secondary d-inline-flex align-items-center gap-2 mt-3"><i class="bi bi-slash-circle"></i> This dish is currently unavailable.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if related_foods %}
+      <div class="section-head mt-5">
+        <div><span class="eyebrow">You might also like</span><h2>More from {{ food.category.name }}</h2></div>
+      </div>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+        {% for food in related_foods %}
+          <div class="col">{% include 'partials/food_card.html' %}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

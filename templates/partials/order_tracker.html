@@ -1,0 +1,14 @@
+{% if order.is_cancelled %}
+  <div class="alert alert-danger d-flex align-items-center gap-2 mb-0">
+    <i class="bi bi-x-circle-fill"></i> This order was cancelled.
+  </div>
+{% else %}
+  <div class="order-tracker" aria-label="Order progress">
+    {% for step in order.tracking_steps %}
+      <div class="tracker-step {{ step.state }}">
+        <div class="dot"><i class="bi {{ step.icon }}"></i></div>
+        {{ step.label }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
