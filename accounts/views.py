@@ -255,7 +255,6 @@ def address_update(request, pk):
 @login_required
 @require_POST
 def address_delete(request, pk):
-
     address = get_object_or_404(
         Address,
         pk=pk,
@@ -263,18 +262,18 @@ def address_delete(request, pk):
     )
 
     was_default = address.is_default
-
     address.delete()
 
     if was_default:
+        next_address = Address.objects.filter(
+            user=request.user
+        ).first()
 
-        replacement = request.user.addresses.first()
+        if next_address:
+            next_address.is_default = True
+            next_address.save()
 
-        if replacement:
-            replacement.is_default = True
-            replacement.save()
-
-    messages.success(request, 'Address deleted.')
+    messages.success(request, 'Address deleted successfully.')
 
     return redirect('accounts:address_list')
 

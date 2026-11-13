@@ -7,6 +7,6 @@ from .models import Profile
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile(sender, instance, created, **kwargs):
-
+    """Every user gets a Profile automatically (including admin-created users)."""
     if created:
         Profile.objects.get_or_create(user=instance)

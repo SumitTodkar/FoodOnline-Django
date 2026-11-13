@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}My Addresses | FoodOnline{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Addresses</h2>
+
+        <a href="{% url 'accounts:address_create' %}" class="btn btn-primary">
+            + Add New Address
+        </a>
+    </div>
+
+    {% if addresses %}
+    <div class="row">
+
+        {% for address in addresses %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+                        <h5>{{ address.full_name }}</h5>
+
+                        {% if address.is_default %}
+                        <span class="badge bg-success">
+                            Default
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <p class="mb-1">{{ address.phone }}</p>
+                    <p class="mb-1">{{ address.line1 }}</p>
+
+                    {% if address.line2 %}
+                    <p class="mb-1">{{ address.line2 }}</p>
+                    {% endif %}
+
+                    {% if address.landmark %}
+                    <p class="mb-1">
+                        Landmark: {{ address.landmark }}
+                    </p>
+                    {% endif %}
+
+                    <p class="mb-3">
+                        {{ address.city }}, {{ address.state }}
+                        - {{ address.pincode }}
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <a href="{% url 'accounts:address_update' address.pk %}" class="btn btn-sm btn-outline-primary">
+                            Edit
+                        </a>
+
+                        <form method="POST" action="{% url 'accounts:address_delete' address.pk %}">
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </button>
+                        </form>
+
+                        {% if not address.is_default %}
+                        <form method="POST" action="{% url 'accounts:address_set_default' address.pk %}">
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                Set as Default
+                            </button>
+                        </form>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+    <div class="alert alert-info">
+        You haven't added any addresses yet.
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
