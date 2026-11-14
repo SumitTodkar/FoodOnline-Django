@@ -1,27 +1,30 @@
-# Python
-__pycache__/
-*.py[cod]
 
-# Virtual environment
+# Virtual Environment
 env/
 venv/
 .venv/
 
-# Django database
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Django
+*.log
 db.sqlite3
-
-# Uploaded files
-media/
-
-# Static files
+db.sqlite3-journal
 staticfiles/
 
-# Environment variables
+# Environment Variables
 .env
+.env.*
 
-# VS Code
+# Media Uploads
+media/
+
+# IDE
 .vscode/
+.idea/
 
-# System files
+# Operating System
 .DS_Store
 Thumbs.db
