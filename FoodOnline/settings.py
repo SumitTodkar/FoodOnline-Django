@@ -54,7 +54,11 @@ if not SECRET_KEY:
             'Set the DJANGO_SECRET_KEY environment variable when DJANGO_DEBUG is off.'
         )
 
-ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS = [
+    'foodonline-django-1-5tp73wduf-sumit-bba8.vercel.app',
+    'localhost',
+    '127.0.0.1',
+]
 CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
 
 if not DEBUG:
