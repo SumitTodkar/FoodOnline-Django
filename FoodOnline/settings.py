@@ -55,9 +55,9 @@ if not SECRET_KEY:
         )
 
 ALLOWED_HOSTS = [
-    'foodonline-django-1-5tp73wduf-sumit-bba8.vercel.app',
-    'localhost',
-    '127.0.0.1',
+    ".vercel.app",
+    "localhost",
+    "127.0.0.1",
 ]
 CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
 
